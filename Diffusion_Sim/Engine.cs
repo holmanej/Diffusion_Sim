@@ -27,7 +27,7 @@ namespace Diffusion_Sim
         private float Ambient_T = 300f; // K
 
         // Engine Params
-        private float Flow_in = 0; // air flux in m3 / s
+        private float Flow_in = 0; // air flux (m3)
         private float Choke_out = 1; // ratio to pipe diameter
         private float Pipe_Diameter = 1; // m
         private float Pipe_Length = 1; // m
@@ -57,41 +57,39 @@ namespace Diffusion_Sim
 
         public void Timestep()
         {
-            M_Values[0] += CalcMolarityIn(Flow_in) - CalcMolarityOut(P_Values[1]);
-            Debug.WriteLine("i: 0" + "  dM: " + (CalcMolarityIn(Flow_in) - CalcMolarityOut(P_Values[1])) + "  M+: " + M_Values[0]);
+            M_Values[0] += Influx(Flow_in) - OutFlux(P_Values[1]);
+            Debug.WriteLine("i: 0" + "  dM: " + (Influx(Flow_in) - OutFlux(P_Values[1])) + "  M+: " + M_Values[0]);
 
             List<float> lastM = new List<float>(M_Values);
             List<float> lastP = new List<float>(P_Values);
 
             for (int i = 1; i < M_Values.Count - 1; i++)
             {
-                float diff_coeff = A * (float)Math.Pow(Ambient_T, 1.5) * (float)Math.Sqrt(1 / Air_MolarMass + 1 / Air_MolarMass) / (lastP[i] * (float)Math.Pow((Air_Diameter + Air_Diameter) / 2, 2));
-                float Divrg = lastM[i - 1] + lastM[i + 1] - 2 * lastM[i];
+                float diff_coeff = A * (float)Math.Pow(Ambient_T, 1.5) * (float)Math.Sqrt(1 / Air_MolarMass + 1 / Air_MolarMass) / (lastP[i] * (float)Math.Pow((Air_Diameter + Air_Diameter) / 2, 2)); // cm2 / s
+                float Divrg = lastM[i - 1] + lastM[i + 1] - 2 * lastM[i]; // mol
                 //Debug.WriteLine("i: " + i + "  P: " + P_Values[i] + "  DC: " + diff_coeff + "  S: " + Divrg + "  M: " + M_Values[i]);
-                M_Values[i] += diff_coeff * Divrg;
-                P_Values[i] = CalcPressure(M_Values[i]) / Atm_Coeff;
+                M_Values[i] += diff_coeff / 100 / Pipe_Volume * Divrg;
+                P_Values[i] = CalcPressure(M_Values[i]);
             }
-            M_Values[M_Values.Count - 1] -= CalcMolarityOut(P_Values[P_Values.Count - 2]);
+            M_Values[M_Values.Count - 1] -= OutFlux(P_Values[P_Values.Count - 2]);
             //Debug.WriteLine("delta mass: " + (M_Values.Sum() - lastM.Sum()));
-            Debug.WriteLine("net flow: " + (CalcMolarityIn(Flow_in) - CalcMolarityOut(P_Values[P_Values.Count - 2])));
+            Debug.WriteLine("net flow: " + (Influx(Flow_in) - OutFlux(P_Values[P_Values.Count - 2])));
             //Debug.WriteLine("i: 101" + "  P: " + P_Values[101] + "  M: " + M_Values[101]);
         }
 
-        private float CalcPressure(float M)
+        private float CalcPressure(float n)
         {
-            return M * R * Ambient_T / Pipe_Volume; // pascals
+            return n * R * Ambient_T / Pipe_Volume / Atm_Coeff; // atm
         }
 
-        private float CalcMolarityIn(float Flow_in)
+        private float Influx(float Flow_in)
         {
-            float flow = Flow_in * Air_Density / Air_MolarMass; // mol / s
-            return flow * (float)Math.Sqrt(2 * Pi * Air_MolarMass * R * Ambient_T) / (Pipe_Area * R * Ambient_T); // mol
+            return Flow_in * Ambient_P / (R * Ambient_T); // mols
         }
 
-        private float CalcMolarityOut(float pressure)
+        private float OutFlux(float pressure)
         {
-            float flow = (pressure - Ambient_P) * Pipe_Area * Choke_out / (float)Math.Sqrt(2 * Pi * Air_MolarMass * R * Ambient_T); // mol
-            return flow / Pipe_Volume; // mol
+            return (pressure - Ambient_P) * Pipe_Area * Choke_out / (float)Math.Sqrt(2 * Pi * Air_MolarMass * R * Ambient_T); // mols
         }
     }
 }
