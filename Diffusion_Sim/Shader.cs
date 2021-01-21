@@ -95,7 +95,7 @@ namespace Diffusion_Sim
 
         ~Shader()
         {
-            GL.DeleteProgram(Handle);
+            //GL.DeleteProgram(Handle);
         }
 
 
@@ -129,6 +129,12 @@ namespace Diffusion_Sim
 
             int loc = GL.GetUniformLocation(Handle, "transform");
             GL.UniformMatrix4(loc, true, ref transform);
+        }
+
+        public void SetTexture(string name, int unit)
+        {
+            GL.UseProgram(Handle);
+            GL.Uniform1(GL.GetUniformLocation(Handle, name), unit);
         }
     }
 }

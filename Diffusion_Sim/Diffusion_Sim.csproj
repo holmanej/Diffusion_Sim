@@ -36,6 +36,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\Unofficial.OpenTK.3.0.19\lib\netstandard2.0\OpenTK.dll</HintPath>
     </Reference>
@@ -50,11 +53,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PrimitiveHelper.cs" />
+    <Compile Include="Engine.cs" />
+    <Compile Include="GraphicsObject.cs" />
+    <Compile Include="GLTFObject.cs" />
+    <Compile Include="GLTF_Converter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RenderWindow.cs" />
     <Compile Include="Shader.cs" />
+    <Compile Include="TextObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
