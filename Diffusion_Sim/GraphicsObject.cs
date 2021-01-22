@@ -13,18 +13,18 @@ using System.Threading.Tasks;
 
 namespace Diffusion_Sim
 {
-    class GraphicsObject
+    public class GraphicsObject
     {
         public class Section
         {
             public List<float> VBOData;
-            public List<float> NormalData;
             public byte[] ImageData;
             public Size ImageSize;
             public float metal;
             public float rough;
         }
 
+        public List<GraphicsObject> Controls;
         public List<Section> RenderSections;
         public Shader Shader;
 
@@ -40,51 +40,34 @@ namespace Diffusion_Sim
         public bool Enabled = true;
         public bool Collidable = false;
 
-        private void CalculateNormalData()
-        {
-            //Stopwatch sw = new Stopwatch();
-            //sw.Restart();
-            foreach (Section section in RenderSections)
-            {
-                section.NormalData = new List<float>();
-
-                for (int i = 0; i < section.VBOData.Count; i += 36)
-                {
-                    Vector3 a = new Vector3(section.VBOData[i], section.VBOData[i + 1], section.VBOData[i + 2]);
-                    Vector3 b = new Vector3(section.VBOData[i + 12], section.VBOData[i + 13], section.VBOData[i + 14]);
-                    Vector3 c = new Vector3(section.VBOData[i + 24], section.VBOData[i + 25], section.VBOData[i + 26]);
-                    Vector3 n = Vector3.Cross(b - a, c - a);
-
-                    a = (new Vector4(a.X * _Scale.X, a.Y * _Scale.Y, a.Z * _Scale.Z, 1) * matRot).Xyz;
-                    n = (new Vector4(n, 1) * matRot).Xyz;
-
-                    section.NormalData.Add(a.X + _Position.X);
-                    section.NormalData.Add(a.Y + _Position.Y);
-                    section.NormalData.Add(a.Z + _Position.Z);
-                    section.NormalData.Add((float)Math.Round(n.X, 2));
-                    section.NormalData.Add((float)Math.Round(n.Y, 2));
-                    section.NormalData.Add((float)Math.Round(n.Z, 2));
-                    section.NormalData.Add(n.Length);
-                }
-            }
-            //sw.Stop();
-            //Debug.WriteLine("recalc normals: " + sw.Elapsed);
-        }
-
         public void Translate(float x, float y, float z)
         {
-            Vector3 newPos = new Vector3(Position.X + x, Position.Y + y, Position.Z + z);
-            Position = newPos;
+            Position = new Vector3(Position.X + x, Position.Y + y, Position.Z + z);
         }
 
         public void ReSize(float x, float y, float z)
         {
-            Scale = new Vector3(Scale.X + x, Scale.Y + y, Scale.Z + z);
+            Scale = new Vector3(Scale.X * x, Scale.Y * y, Scale.Z * z);
         }
 
         public void Rotate(float x, float y, float z)
         {
             Rotation = new Vector3(Rotation.X + x, Rotation.Y + y, Rotation.Z + z);
+        }
+
+        public void Translate(Vector3 t)
+        {
+            Position = new Vector3(Position.X + t.X, Position.Y + t.Y, Position.Z + t.Z);
+        }
+
+        public void ReSize(Vector3 s)
+        {
+            Scale = new Vector3(Scale.X * s.X, Scale.Y * s.Y, Scale.Z * s.Z);
+        }
+
+        public void Rotate(Vector3 r)
+        {
+            Rotation = new Vector3(Rotation.X + r.X, Rotation.Y + r.Y, Rotation.Z + r.Z);
         }
 
         public Vector3 Position
@@ -96,7 +79,6 @@ namespace Diffusion_Sim
                 {
                     _Position = value;
                     matPos = Matrix4.CreateTranslation(_Position);
-                    CalculateNormalData();
                 }
             }
         }
@@ -110,7 +92,6 @@ namespace Diffusion_Sim
                 {
                     _Scale = value;
                     matScale = Matrix4.CreateScale(_Scale);
-                    CalculateNormalData();
                 }
             }
         }
@@ -123,8 +104,7 @@ namespace Diffusion_Sim
                 if (value != _Rotation)
                 {
                     _Rotation = value;
-                    matRot = Matrix4.CreateRotationX(_Rotation.X * 3.14f / 180) * Matrix4.CreateRotationY(_Rotation.Y * 3.14f / 180) * Matrix4.CreateRotationZ(_Rotation.Z * 3.14f / 180);
-                    CalculateNormalData();
+                    matRot = Matrix4.CreateRotationX(_Rotation.X * 3.14f / 180) * Matrix4.CreateRotationZ(_Rotation.Z * 3.14f / 180) * Matrix4.CreateRotationY(_Rotation.Y * 3.14f / 180);
                 }
             }
         }

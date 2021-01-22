@@ -20,15 +20,12 @@ out vec3 fragNormal;
 out vec2 texCoord;
 
 out vec4 objColor;
-out vec3 lightColor;
-out vec3 lightPos;
-out vec3 viewPos;
 
 void main()
 {
-	vec4 obj = vec4(vPosition, 1f) * obj_translate;
-	gl_Position = obj * model;
-
+	//vec4 obj = vec4(vPosition, 1f) * obj_scale * obj_translate;
+	//gl_Position = obj * model;
+	gl_Position = vec4(vPosition, 1f) * obj_scale * model;
 	
 	fragPos = vec3(vec4(vPosition, 1f) * model);
 	fragNormal = vNormal * mat3(transpose(inverse(model)));
@@ -36,7 +33,4 @@ void main()
 	texCoord = tCoord;
 	
 	objColor = vColor;
-	lightColor = vec3(1f, 1f, 1f);
-	lightPos = vec3(10f, 10f, -10f);
-	viewPos = vec3(0f, 0f, 0f);
 }

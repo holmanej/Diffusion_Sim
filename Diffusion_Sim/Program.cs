@@ -15,6 +15,7 @@ namespace Diffusion_Sim
     {
         static public Dictionary<string, Shader> Shaders;
         static public Dictionary<string, FontFamily> Fonts;
+        static public List<Engine> Engines = new List<Engine>();
 
         static void Main(string[] args)
         {
@@ -26,8 +27,9 @@ namespace Diffusion_Sim
                 SetDir(@"/resources/models");
                 //SimWin.GraphicsObjects.Add(new GLTFObject(new GLTF_Converter("compressor cylinder.gltf"), Shaders["shader"]));
                 //SimWin.GraphicsObjects.Add(new TextObject("Hewwo", Fonts["times"], Shaders["text"]) { Position = new Vector3(-1f, -1f, 0f), Color = System.Drawing.Color.White, BGColor = System.Drawing.Color.Black, Size = 8 });
-                Engine firstEngine = new Engine("compressor cylinder.gltf", "");
-                SimWin.GraphicsObjects.Add(firstEngine.Engine_Model);
+                Engine firstEngine = new Engine("cylinder_1m.gltf", "");
+                Engines.Add(firstEngine);
+                SimWin.Controls.Add(firstEngine);
 
                 SimWin.VSync = VSyncMode.Adaptive;
                 SimWin.Run(60, 60);
@@ -85,5 +87,28 @@ namespace Diffusion_Sim
             //Debug.WriteLine("Setting Directory");
             //Debug.WriteLine(Directory.GetCurrentDirectory());
         }
+    }
+
+    public class Color
+    {
+        public float R;
+        public float G;
+        public float B;
+        public float A;
+
+        public Color(float r, float g, float b, float a)
+        {
+            R = r;
+            G = g;
+            B = b;
+            A = a;
+        }
+
+        public static Color White = new Color(1f, 1f, 1f, 1f);
+        public static Color Black = new Color(0f, 0f, 0f, 1f);
+        public static Color Red = new Color(1f, 0.25f, 0.25f, 1f);
+        public static Color DarkRed = new Color(1f, 0f, 0f, 1f);
+        public static Color Blue = new Color(0f, 0f, 1f, 1f);
+        public static Color LightBlue = new Color(0.25f, 0.25f, 0.75f, 1f);
     }
 }

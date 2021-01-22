@@ -15,7 +15,7 @@ namespace Diffusion_Sim
 {
     class RenderWindow : GameWindow
     {
-        public List<GraphicsObject> GraphicsObjects = new List<GraphicsObject>();
+        public List<GraphicsObject> Controls = new List<GraphicsObject>();
         Shader shader;
         private const int VPosition_loc = 0;
         private const int VNormal_loc = 1;
@@ -32,8 +32,9 @@ namespace Diffusion_Sim
 
 
         private int VerticesLength;
-        private float ZPosition = -100; // zoom
+        private float ZPosition = -5; // zoom
         private float XRotation = 0; // l/r
+        private float ZRotation = 0; // l/r
         private float YRotation = 0; // u/d
 
         public RenderWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title)
@@ -54,9 +55,11 @@ namespace Diffusion_Sim
         private void RenderWindow_MouseMove(object sender, MouseMoveEventArgs e)
         {
             if (e.Mouse.LeftButton == ButtonState.Pressed)
-            {
-                XRotation += e.YDelta / 5f;
-                YRotation += e.XDelta / 5f;
+            {                
+                XRotation += e.YDelta / 10f * (float)Math.Cos(YRotation * 3.14f / 180f);
+                ZRotation += e.YDelta / 10f * (float)Math.Sin(YRotation * 3.14f / 180f);
+                YRotation += e.XDelta / 10f;
+                //Debug.WriteLine(YRotation + "  " + XRotation + "  " + ZRotation + "  " + Math.Cos(YRotation * 3.14f / 180f) + "  " + Math.Sin(YRotation * 3.14f / 180f));
             }
         }
 
@@ -64,11 +67,11 @@ namespace Diffusion_Sim
         {
             if (e.DeltaPrecise > 0)
             {
-                ZPosition += 1f;
+                ZPosition += 0.1f;
             }
             else
             {
-                ZPosition -= 1f;
+                ZPosition -= 0.1f;
             }
         }
 
@@ -90,6 +93,13 @@ namespace Diffusion_Sim
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            foreach (Engine engine in Program.Engines)
+            {
+                engine.Timestep();
+                engine.Engine_Model.Position = new Vector3(0, 0, ZPosition);
+                engine.Engine_Model.Rotation = new Vector3(XRotation, YRotation, ZRotation);
+            }
+
             base.OnUpdateFrame(e);
         }
 
@@ -98,7 +108,7 @@ namespace Diffusion_Sim
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
 
-            Model = Matrix4.CreateRotationX(0f);
+            Model = Matrix4.CreateScale(9 / 16f, 1f, 1f);
             View = Matrix4.CreateTranslation(0f, 0f, 0f);
             Projection = Matrix4.CreatePerspectiveFieldOfView(90f * 3.14f / 180f, 1, 0.01f, 200f);
 
@@ -126,7 +136,7 @@ namespace Diffusion_Sim
             GL.DeleteVertexArray(VertexArrayObject);
             GL.DeleteBuffer(VertexBufferObject);
             GL.DeleteTexture(TextureBufferObject);
-            GraphicsObjects.ForEach(obj => obj.Shader.Dispose());
+            Controls.ForEach(obj => { if (obj.Shader != null) obj.Shader.Dispose(); });
 
             base.OnUnload(e);
         }
@@ -137,38 +147,55 @@ namespace Diffusion_Sim
 
             GL.BindVertexArray(VertexArrayObject);            
 
-            foreach (GraphicsObject graphicsObject in GraphicsObjects)
+            foreach (GraphicsObject control in Controls)
             {
-                if (graphicsObject.Enabled)
-                {
-                    shader = graphicsObject.Shader;
-                    shader.Use();
-
-                    View = Matrix4.CreateTranslation(0, 0, ZPosition);
-                    shader.SetMatrix4("model", Model);
-                    shader.SetMatrix4("view", View);
-                    shader.SetMatrix4("projection", Projection);
-
-                    graphicsObject.Rotation = new Vector3(XRotation, YRotation, 0f);
-
-                    shader.SetMatrix4("obj_translate", graphicsObject.matPos);
-                    shader.SetMatrix4("obj_scale", graphicsObject.matScale);
-                    shader.SetMatrix4("obj_rotate", graphicsObject.matRot);
-
-                    shader.SetTexture("texture0", 0);
-
-                    foreach (GraphicsObject.Section section in graphicsObject.RenderSections)
-                    {
-                        BufferObject(section.VBOData.ToArray(), section.ImageData, section.ImageSize);
-                        GL.DrawArrays(PrimitiveType.Triangles, 0, VerticesLength);
-                    }
-
-                }
+                TraverseObjects(control);
             }
             GL.BindVertexArray(0);
 
+            Debug.WriteLine(RenderTime);
             Context.SwapBuffers();
             base.OnRenderFrame(e);
+        }
+
+        private void TraverseObjects(GraphicsObject graphicsObject)
+        {
+            if (graphicsObject.Enabled)
+            {
+                foreach (GraphicsObject control in graphicsObject.Controls)
+                {
+                    if (control.Controls == null)
+                    {
+                        RenderObject(control);
+                    }
+                    else
+                    {
+                        TraverseObjects(control);
+                    }
+                }
+            }
+        }
+
+        private void RenderObject(GraphicsObject graphicsObject)
+        {
+            shader = graphicsObject.Shader;
+            shader.Use();
+
+            shader.SetMatrix4("model", Model);
+            shader.SetMatrix4("view", View);
+            shader.SetMatrix4("projection", Projection);
+
+            shader.SetMatrix4("obj_translate", graphicsObject.matPos);
+            shader.SetMatrix4("obj_scale", graphicsObject.matScale);
+            shader.SetMatrix4("obj_rotate", graphicsObject.matRot);
+
+            shader.SetTexture("texture0", 0);
+
+            foreach (GraphicsObject.Section section in graphicsObject.RenderSections)
+            {
+                BufferObject(section.VBOData.ToArray(), section.ImageData, section.ImageSize);
+                GL.DrawArrays(PrimitiveType.Triangles, 0, VerticesLength);
+            }
         }
 
         protected override void OnResize(EventArgs e)

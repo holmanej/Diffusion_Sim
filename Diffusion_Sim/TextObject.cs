@@ -19,16 +19,16 @@ namespace Diffusion_Sim
 
         public string _Text;
         public int _Size;
-        public Color _Color;
-        public Color _BGColor;
+        public System.Drawing.Color _Color;
+        public System.Drawing.Color _BGColor;
 
-        public TextObject(string text, FontFamily fontfamily, Shader shader)
+        public TextObject(string text, FontFamily fontfamily)
         {
-            Shader = shader;
+            Shader = Program.Shaders["text"];
             _Text = text;
             _Size = 12;
-            _Color = Color.Black;
-            _BGColor = Color.White;
+            _Color = System.Drawing.Color.Black;
+            _BGColor = System.Drawing.Color.White;
             FontFamily = fontfamily;
 
             CreateBitmaps();
@@ -129,7 +129,7 @@ namespace Diffusion_Sim
             }
         }
 
-        public Color Color
+        public System.Drawing.Color Color
         {
             get { return _Color; }
             set
@@ -143,7 +143,7 @@ namespace Diffusion_Sim
             }
         }
 
-        public Color BGColor
+        public System.Drawing.Color BGColor
         {
             get { return _BGColor; }
             set

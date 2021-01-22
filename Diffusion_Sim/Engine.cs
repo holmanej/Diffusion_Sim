@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace Diffusion_Sim
 {
-    class Engine
+    class Engine : GraphicsObject
     {
-        public GLTFObject Engine_Model;        
+        public GraphicsObject Engine_Model;
+        private GraphingObject PrsrGraph;
+        private GraphingObject MassGraph;
 
         // Constants
         private const float Pi = 3.14f;
         private const float A = .001859f; // coeff coeff
-        private const float R = 8.31f; // gas constant
+        private const float B = 8.31f; // gas constant
         private const float Na = 6E23f; // Avo
         private const float Atm_Coeff = 101325f; // pascals to atm
         private const float Air_MolarMass = 0.029f; // kg / mol
@@ -27,12 +29,13 @@ namespace Diffusion_Sim
         private float Ambient_T = 300f; // K
 
         // Engine Params
-        private float Flow_in = 0; // air flux (m3)
-        private float Choke_out = 1; // ratio to pipe diameter
-        private float Pipe_Diameter = 1; // m
-        private float Pipe_Length = 1; // m
-        private float Pipe_Volume = 1; // m3
-        private float Pipe_Area = 1; // m2
+        private float Flow_in = 10; // air flux (m3)
+        private float Choke_Diameter = 1; // m
+        private float Choke_Length = 1; // m
+        private float Engine_Diameter = 0.25f; // m
+        private float Engine_Length = 0.5f; // m
+        private float Engine_Volume = 1; // m3
+        private float Engine_Area = 1; // m2
 
         // Simulation Params
         private int Resolution = 100;
@@ -42,12 +45,37 @@ namespace Diffusion_Sim
 
         public Engine(string gltf_file, string spec_file)
         {
-            Engine_Model = new GLTFObject(new GLTF_Converter(gltf_file), Program.Shaders["shader"]);
+            Engine_Model = new GLTFObject(new GLTF_Converter(gltf_file))
+            {
+                Scale = new Vector3(Engine_Diameter, Engine_Diameter, Engine_Length)
+            };
 
-            Pipe_Area = Pi * Pipe_Diameter * Pipe_Diameter;
-            Pipe_Volume = Pipe_Area * Pipe_Length / Resolution;
+            MassGraph = new GraphingObject()
+            {
+                //Scale = new Vector3(0.004f, 0.01f, 1f),
+                //Position = new Vector3(-0.9f, -0.9f, 0f)
+            };
 
-            float initial_mass = (Ambient_P * Atm_Coeff * Pipe_Volume) / (R * Ambient_T);
+            PrsrGraph = new GraphingObject()
+            {
+                Scale = new Vector3(0.004f, 0.01f, 1f),
+                Position = new Vector3(-0.4f, -0.9f, 0f)
+            };
+
+            var text = new TextObject("hewwo", Program.Fonts["times"]);
+
+            Controls = new List<GraphicsObject>
+            {
+                Engine_Model,
+                MassGraph
+                //PrsrGraph
+                //text
+            };
+
+            Engine_Area = Pi * Engine_Diameter * Engine_Diameter;
+            Engine_Volume = Engine_Area * Engine_Length / Resolution;
+
+            float initial_mass = (Ambient_P * Atm_Coeff * Engine_Volume) / (B * Ambient_T);
             for (int i = 0; i < 102; i++)
             {
                 M_Values.Add(initial_mass);
@@ -58,7 +86,7 @@ namespace Diffusion_Sim
         public void Timestep()
         {
             M_Values[0] += Influx(Flow_in) - OutFlux(P_Values[1]);
-            Debug.WriteLine("i: 0" + "  dM: " + (Influx(Flow_in) - OutFlux(P_Values[1])) + "  M+: " + M_Values[0]);
+            //Debug.WriteLine("i: 0" + "  dM: " + (Influx(Flow_in) - OutFlux(P_Values[1])) + "  M+: " + M_Values[0]);
 
             List<float> lastM = new List<float>(M_Values);
             List<float> lastP = new List<float>(P_Values);
@@ -68,28 +96,31 @@ namespace Diffusion_Sim
                 float diff_coeff = A * (float)Math.Pow(Ambient_T, 1.5) * (float)Math.Sqrt(1 / Air_MolarMass + 1 / Air_MolarMass) / (lastP[i] * (float)Math.Pow((Air_Diameter + Air_Diameter) / 2, 2)); // cm2 / s
                 float Divrg = lastM[i - 1] + lastM[i + 1] - 2 * lastM[i]; // mol
                 //Debug.WriteLine("i: " + i + "  P: " + P_Values[i] + "  DC: " + diff_coeff + "  S: " + Divrg + "  M: " + M_Values[i]);
-                M_Values[i] += diff_coeff / 100 / Pipe_Volume * Divrg;
+                M_Values[i] += diff_coeff / 100 / Engine_Volume * Divrg;
                 P_Values[i] = CalcPressure(M_Values[i]);
             }
             M_Values[M_Values.Count - 1] -= OutFlux(P_Values[P_Values.Count - 2]);
             //Debug.WriteLine("delta mass: " + (M_Values.Sum() - lastM.Sum()));
-            Debug.WriteLine("net flow: " + (Influx(Flow_in) - OutFlux(P_Values[P_Values.Count - 2])));
+            //Debug.WriteLine("net flow: " + (Influx(Flow_in) - OutFlux(P_Values[P_Values.Count - 2])));
             //Debug.WriteLine("i: 101" + "  P: " + P_Values[101] + "  M: " + M_Values[101]);
+
+            PrsrGraph.RefreshGraph(P_Values);
+            MassGraph.RefreshGraph(M_Values);
         }
 
         private float CalcPressure(float n)
         {
-            return n * R * Ambient_T / Pipe_Volume / Atm_Coeff; // atm
+            return n * B * Ambient_T / Engine_Volume / Atm_Coeff; // atm
         }
 
         private float Influx(float Flow_in)
         {
-            return Flow_in * Ambient_P / (R * Ambient_T); // mols
+            return Flow_in * Ambient_P / (B * Ambient_T); // mols
         }
 
         private float OutFlux(float pressure)
         {
-            return (pressure - Ambient_P) * Pipe_Area * Choke_out / (float)Math.Sqrt(2 * Pi * Air_MolarMass * R * Ambient_T); // mols
+            return (pressure - Ambient_P) * Engine_Area * Choke_Diameter / (float)Math.Sqrt(2 * Pi * Air_MolarMass * B * Ambient_T); // mols
         }
     }
 }

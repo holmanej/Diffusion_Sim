@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Diffusion_Sim
 {
-    class Shader
+    public class Shader
     {
         private int Handle;
 
@@ -92,12 +92,6 @@ namespace Diffusion_Sim
                 disposedValue = true;
             }
         }
-
-        ~Shader()
-        {
-            //GL.DeleteProgram(Handle);
-        }
-
 
         public void Dispose()
         {

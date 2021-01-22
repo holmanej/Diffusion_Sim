@@ -134,48 +134,50 @@ namespace Diffusion_Sim
             
             Debug.WriteLine("Deserialize: " + sw.Elapsed);
             {
-                //Debug.WriteLine("Asset: " + ModelData.asset["version"]);
-                //Debug.WriteLine("Generator: " + ModelData.asset["generator"]);
-                //Debug.WriteLine("Scene cnt: " + ModelData.scene);
-                //Debug.WriteLine("Scene-Node: " + ModelData.scenes[0].nodes[0]);
-                //Debug.WriteLine("Node Name: " + ModelData.nodes[0].name);
-                //Debug.WriteLine("Node Mesh: " + ModelData.nodes[0].mesh);
-                //Debug.WriteLine("Material Count: " + ModelData.materials.Count);
-                //Debug.WriteLine("Material Name: " + ModelData.materials[0].name);
-                //Debug.WriteLine("Material DblS: " + ModelData.materials[0].doubleSided);
-                //Debug.WriteLine("Material-tex-index: " + ModelData.materials[1].pbrMetallicRoughness.baseColorTexture.index);
-                //Debug.Write("Colors: ");
-                //ModelData.materials[0].pbrMetallicRoughness.baseColorFactor.ForEach(n => Debug.Write(n + ", "));
-                //Debug.WriteLine("\r\nMetallic Factor: " + ModelData.materials[0].pbrMetallicRoughness.metallicFactor);
-                //Debug.WriteLine("Roughness Factor: " + ModelData.materials[0].pbrMetallicRoughness.roughnessFactor);
-                //Debug.WriteLine("Image-bufferView: " + ModelData.images[0].bufferView);
-                //Debug.WriteLine("Image-mimeType: " + ModelData.images[0].mimeType);
-                //Debug.WriteLine("Texture-source: " + ModelData.textures[0].source);
-                //Debug.WriteLine("Texture-sampler: " + ModelData.textures[0].sampler);
-                //Debug.WriteLine("Mesh Attribute Position: " + ModelData.meshes[0].primitives[0].attributes.POSITION);
-                //Debug.WriteLine("Mesh Attribute Normal: " + ModelData.meshes[0].primitives[0].attributes.NORMAL);
-                //Debug.WriteLine("Mesh Attribute TexCoord: " + ModelData.meshes[0].primitives[1].attributes.TEXCOORD_0);
-                //Debug.WriteLine("Mesh Indicies: " + ModelData.meshes[0].primitives[0].indices);
-                //Debug.WriteLine("Mesh Mode: " + ModelData.meshes[0].primitives[0].mode);
-                //Debug.WriteLine("Mesh Material: " + ModelData.meshes[0].primitives[0].material);
-                //Debug.WriteLine("Accessor Bufferview: " + ModelData.accessors[0].bufferView);
-                //Debug.WriteLine("Accessor CompType: " + ModelData.accessors[0].componentType);
-                //Debug.WriteLine("Accessor Count: " + ModelData.accessors[0].count);
-                //Debug.WriteLine("Accessor Type: " + ModelData.accessors[0].type);
-                //Debug.Write("Min: ");
-                //ModelData.accessors[0].min.ForEach(n => Debug.Write(n + ", "));
-                //Debug.Write("Max: ");
-                //ModelData.accessors[0].max.ForEach(n => Debug.Write(n + ", "));
-                //Debug.WriteLine("BufferView Count: " + ModelData.bufferViews.Count);
-                //foreach (Dictionary<string, int> b in ModelData.bufferViews)
-                //{
-                //    Debug.WriteLine("Buffer: " + b["buffer"]);
-                //    Debug.WriteLine("Bufferlength: " + b["byteLength"]);
-                //    Debug.WriteLine("Target: " + b["target"]);
-                //}
+                {
+                    //Debug.WriteLine("Asset: " + ModelData.asset["version"]);
+                    //Debug.WriteLine("Generator: " + ModelData.asset["generator"]);
+                    //Debug.WriteLine("Scene cnt: " + ModelData.scene);
+                    //Debug.WriteLine("Scene-Node: " + ModelData.scenes[0].nodes[0]);
+                    //Debug.WriteLine("Node Name: " + ModelData.nodes[0].name);
+                    //Debug.WriteLine("Node Mesh: " + ModelData.nodes[0].mesh);
+                    //Debug.WriteLine("Material Count: " + ModelData.materials.Count);
+                    //Debug.WriteLine("Material Name: " + ModelData.materials[0].name);
+                    //Debug.WriteLine("Material DblS: " + ModelData.materials[0].doubleSided);
+                    //Debug.WriteLine("Material-tex-index: " + ModelData.materials[1].pbrMetallicRoughness.baseColorTexture.index);
+                    //Debug.Write("Colors: ");
+                    //ModelData.materials[0].pbrMetallicRoughness.baseColorFactor.ForEach(n => Debug.Write(n + ", "));
+                    //Debug.WriteLine("\r\nMetallic Factor: " + ModelData.materials[0].pbrMetallicRoughness.metallicFactor);
+                    //Debug.WriteLine("Roughness Factor: " + ModelData.materials[0].pbrMetallicRoughness.roughnessFactor);
+                    //Debug.WriteLine("Image-bufferView: " + ModelData.images[0].bufferView);
+                    //Debug.WriteLine("Image-mimeType: " + ModelData.images[0].mimeType);
+                    //Debug.WriteLine("Texture-source: " + ModelData.textures[0].source);
+                    //Debug.WriteLine("Texture-sampler: " + ModelData.textures[0].sampler);
+                    //Debug.WriteLine("Mesh Attribute Position: " + ModelData.meshes[0].primitives[0].attributes.POSITION);
+                    //Debug.WriteLine("Mesh Attribute Normal: " + ModelData.meshes[0].primitives[0].attributes.NORMAL);
+                    //Debug.WriteLine("Mesh Attribute TexCoord: " + ModelData.meshes[0].primitives[1].attributes.TEXCOORD_0);
+                    //Debug.WriteLine("Mesh Indicies: " + ModelData.meshes[0].primitives[0].indices);
+                    //Debug.WriteLine("Mesh Mode: " + ModelData.meshes[0].primitives[0].mode);
+                    //Debug.WriteLine("Mesh Material: " + ModelData.meshes[0].primitives[0].material);
+                    //Debug.WriteLine("Accessor Bufferview: " + ModelData.accessors[0].bufferView);
+                    //Debug.WriteLine("Accessor CompType: " + ModelData.accessors[0].componentType);
+                    //Debug.WriteLine("Accessor Count: " + ModelData.accessors[0].count);
+                    //Debug.WriteLine("Accessor Type: " + ModelData.accessors[0].type);
+                    //Debug.Write("Min: ");
+                    //ModelData.accessors[0].min.ForEach(n => Debug.Write(n + ", "));
+                    //Debug.Write("Max: ");
+                    //ModelData.accessors[0].max.ForEach(n => Debug.Write(n + ", "));
+                    //Debug.WriteLine("BufferView Count: " + ModelData.bufferViews.Count);
+                    //foreach (Dictionary<string, int> b in ModelData.bufferViews)
+                    //{
+                    //    Debug.WriteLine("Buffer: " + b["buffer"]);
+                    //    Debug.WriteLine("Bufferlength: " + b["byteLength"]);
+                    //    Debug.WriteLine("Target: " + b["target"]);
+                    //}
 
-                //Debug.WriteLine("URI: " + ModelData.buffers[0].uri);
-                //Debug.WriteLine("Byte Length: " + ModelData.buffers[0].byteLength);
+                    //Debug.WriteLine("URI: " + ModelData.buffers[0].uri);
+                    //Debug.WriteLine("Byte Length: " + ModelData.buffers[0].byteLength);
+                }
             }
 
         }

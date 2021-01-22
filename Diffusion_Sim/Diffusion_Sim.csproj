@@ -57,8 +57,10 @@
     <Compile Include="GraphicsObject.cs" />
     <Compile Include="GLTFObject.cs" />
     <Compile Include="GLTF_Converter.cs" />
+    <Compile Include="GraphingObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RectObject.cs" />
     <Compile Include="RenderWindow.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="TextObject.cs" />
