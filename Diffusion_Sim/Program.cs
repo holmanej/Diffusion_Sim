@@ -31,7 +31,7 @@ namespace Diffusion_Sim
                 Engines.Add(firstEngine);
                 SimWin.Controls.Add(firstEngine);
 
-                SimWin.VSync = VSyncMode.Adaptive;
+                SimWin.VSync = VSyncMode.On;
                 SimWin.Run(60, 60);
             }
         }

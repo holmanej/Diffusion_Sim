@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
@@ -22,6 +23,8 @@ namespace Diffusion_Sim
         private const int VColor_loc = 2;
         private const int TexCoord_loc = 3;
 
+        private int Mat4_Size = Marshal.SizeOf(typeof(Matrix4));
+
         public Matrix4 Model;
         public Matrix4 View;
         public Matrix4 Projection;
@@ -29,7 +32,7 @@ namespace Diffusion_Sim
         private int VertexArrayObject;
         private int VertexBufferObject;
         private int TextureBufferObject;
-
+        private int TransformBufferObject;
 
         private int VerticesLength;
         private float ZPosition = -5; // zoom
@@ -41,6 +44,7 @@ namespace Diffusion_Sim
         {
             VertexArrayObject = GL.GenVertexArray();
             VertexBufferObject = GL.GenBuffer();
+            TransformBufferObject = GL.GenBuffer();
             TextureBufferObject = GL.GenTexture();
 
             MouseMove += RenderWindow_MouseMove;
@@ -149,7 +153,8 @@ namespace Diffusion_Sim
 
             foreach (GraphicsObject control in Controls)
             {
-                TraverseObjects(control);
+                Debug.WriteLine("Top controls: " + Controls.Count);
+                TraverseObjects(control, new TransformObject(control));
             }
             GL.BindVertexArray(0);
 
@@ -158,19 +163,35 @@ namespace Diffusion_Sim
             base.OnRenderFrame(e);
         }
 
-        private void TraverseObjects(GraphicsObject graphicsObject)
+        private void TraverseObjects(GraphicsObject graphicsObject, TransformObject transform)
         {
+            Debug.WriteLine("Sub controls: " + graphicsObject.Controls.Count + "  " + transform.Position);
+
             if (graphicsObject.Enabled)
             {
                 foreach (GraphicsObject control in graphicsObject.Controls)
                 {
+                    var T = new TransformObject(transform);
+                    T.Transforms.AddRange(control.Transforms);
+
                     if (control.Controls == null)
                     {
+                        Debug.WriteLine("leaf control: " + T.Transforms.Count);
+
+                        shader = control.Shader;
+                        shader.Use();
+                        shader.BindUniformBlock("TBuffer");
+
+                        GL.BindBuffer(BufferTarget.UniformBuffer, TransformBufferObject);
+                        GL.BufferData(BufferTarget.UniformBuffer, 24 * Mat4_Size, T.Transforms.ToArray(), BufferUsageHint.StaticDraw);
+                        GL.BindBuffer(BufferTarget.UniformBuffer, 0);
+                        GL.BindBufferRange(BufferRangeTarget.UniformBuffer, 0, TransformBufferObject, (IntPtr)0, 24 * Mat4_Size);
                         RenderObject(control);
                     }
                     else
                     {
-                        TraverseObjects(control);
+                        Debug.WriteLine("next");
+                        TraverseObjects(control, T);
                     }
                 }
             }
@@ -178,16 +199,13 @@ namespace Diffusion_Sim
 
         private void RenderObject(GraphicsObject graphicsObject)
         {
-            shader = graphicsObject.Shader;
-            shader.Use();
-
             shader.SetMatrix4("model", Model);
             shader.SetMatrix4("view", View);
             shader.SetMatrix4("projection", Projection);
 
-            shader.SetMatrix4("obj_translate", graphicsObject.matPos);
-            shader.SetMatrix4("obj_scale", graphicsObject.matScale);
-            shader.SetMatrix4("obj_rotate", graphicsObject.matRot);
+            //shader.SetMatrix4("obj_translate", graphicsObject.matPos);
+            //shader.SetMatrix4("obj_scale", graphicsObject.matScale);
+            //shader.SetMatrix4("obj_rotate", graphicsObject.matRot);
 
             shader.SetTexture("texture0", 0);
 

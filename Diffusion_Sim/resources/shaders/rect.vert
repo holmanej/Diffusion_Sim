@@ -23,9 +23,8 @@ out vec4 objColor;
 
 void main()
 {
-	//vec4 obj = vec4(vPosition, 1f) * obj_scale * obj_translate;
-	//gl_Position = obj * model;
-	gl_Position = vec4(vPosition, 1f) * obj_scale * model;
+	vec4 obj = vec4(vPosition, 1f) * obj_scale * obj_translate;
+	gl_Position = obj * model;
 	
 	fragPos = vec3(vec4(vPosition, 1f) * model);
 	fragNormal = vNormal * mat3(transpose(inverse(model)));

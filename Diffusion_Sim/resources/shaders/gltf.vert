@@ -6,13 +6,14 @@ layout (location = 1) in vec3 vNormal;
 layout (location = 2) in vec4 vColor;
 layout (location = 3) in vec2 tCoord;
 
+layout (std140) uniform TBuffer
+{
+	mat4 TForms[24];
+};
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-
-uniform mat4 obj_translate;
-uniform mat4 obj_scale;
-uniform mat4 obj_rotate;
 
 out vec3 fragPos;
 out vec3 fragNormal;
@@ -26,9 +27,12 @@ out vec3 viewPos;
 
 void main()
 {
-	vec4 obj = vec4(vPosition, 1f) * obj_scale * obj_rotate * obj_translate;
-	gl_Position = obj * model * view * projection;
-
+	vec4 vertexPos = vec4(vPosition, 1f);
+	for (int i = 0; i < 24; i++)
+	{
+		vertexPos * TForms[i];
+	}
+	gl_Position = vertexPos * model * view * projection;
 	
 	fragPos = vec3(vec4(vPosition, 1f) * model);
 	fragNormal = vNormal * mat3(transpose(inverse(model)));
