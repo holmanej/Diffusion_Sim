@@ -28,13 +28,15 @@ namespace Diffusion_Sim
                 -0.5f, -0.5f, 0f, 0f, 0f, 0f, 1f, 1f, 1f, 1f, 0f, 0f
             };
 
-            RenderSections = new List<Section>();
-            RenderSections.Add(new Section()
+            RenderSections = new List<Section>
             {
-                VBOData = Vertices,
-                metal = 1f,
-                rough = 1f,
-            });
+                new Section()
+                {
+                    VBOData = Vertices,
+                    metal = 1f,
+                    rough = 1f,
+                }
+            };
 
             Shader = Program.Shaders["rect"];
         }

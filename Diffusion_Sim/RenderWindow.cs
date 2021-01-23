@@ -23,8 +23,6 @@ namespace Diffusion_Sim
         private const int VColor_loc = 2;
         private const int TexCoord_loc = 3;
 
-        private int Mat4_Size = Marshal.SizeOf(typeof(Matrix4));
-
         public Matrix4 Model;
         public Matrix4 View;
         public Matrix4 Projection;
@@ -32,7 +30,6 @@ namespace Diffusion_Sim
         private int VertexArrayObject;
         private int VertexBufferObject;
         private int TextureBufferObject;
-        private int TransformBufferObject;
 
         private int VerticesLength;
         private float ZPosition = -5; // zoom
@@ -44,7 +41,6 @@ namespace Diffusion_Sim
         {
             VertexArrayObject = GL.GenVertexArray();
             VertexBufferObject = GL.GenBuffer();
-            TransformBufferObject = GL.GenBuffer();
             TextureBufferObject = GL.GenTexture();
 
             MouseMove += RenderWindow_MouseMove;
@@ -114,7 +110,7 @@ namespace Diffusion_Sim
 
             Model = Matrix4.CreateScale(9 / 16f, 1f, 1f);
             View = Matrix4.CreateTranslation(0f, 0f, 0f);
-            Projection = Matrix4.CreatePerspectiveFieldOfView(90f * 3.14f / 180f, 1, 0.01f, 200f);
+            Projection = Matrix4.CreatePerspectiveFieldOfView(60f * 3.14f / 180f, 1f, 0.01f, 200f);
 
             int stride = 12;
             GL.BindVertexArray(VertexArrayObject);
@@ -153,7 +149,8 @@ namespace Diffusion_Sim
 
             foreach (GraphicsObject control in Controls)
             {
-                Debug.WriteLine("Top controls: " + Controls.Count);
+                //Debug.WriteLine("Top controls: " + Controls.Count);
+                //RenderObject(control, new TransformObject());
                 TraverseObjects(control, new TransformObject(control));
             }
             GL.BindVertexArray(0);
@@ -165,7 +162,7 @@ namespace Diffusion_Sim
 
         private void TraverseObjects(GraphicsObject graphicsObject, TransformObject transform)
         {
-            Debug.WriteLine("Sub controls: " + graphicsObject.Controls.Count + "  " + transform.Position);
+            //Debug.WriteLine("Sub controls: " + graphicsObject.Controls.Count + "  " + transform.Position);
 
             if (graphicsObject.Enabled)
             {
@@ -176,32 +173,31 @@ namespace Diffusion_Sim
 
                     if (control.Controls == null)
                     {
-                        Debug.WriteLine("leaf control: " + T.Transforms.Count);
-
-                        shader = control.Shader;
-                        shader.Use();
-                        shader.BindUniformBlock("TBuffer");
-
-                        GL.BindBuffer(BufferTarget.UniformBuffer, TransformBufferObject);
-                        GL.BufferData(BufferTarget.UniformBuffer, 24 * Mat4_Size, T.Transforms.ToArray(), BufferUsageHint.StaticDraw);
-                        GL.BindBuffer(BufferTarget.UniformBuffer, 0);
-                        GL.BindBufferRange(BufferRangeTarget.UniformBuffer, 0, TransformBufferObject, (IntPtr)0, 24 * Mat4_Size);
-                        RenderObject(control);
+                        //Debug.WriteLine("leaf control: " + T.Transforms.Count);
+                        T.Transforms.Reverse();
+                        RenderObject(control, T);
                     }
                     else
                     {
-                        Debug.WriteLine("next");
+                        //Debug.WriteLine("next");
                         TraverseObjects(control, T);
                     }
                 }
             }
         }
 
-        private void RenderObject(GraphicsObject graphicsObject)
+        private void RenderObject(GraphicsObject graphicsObject, TransformObject transforms)
         {
+            shader = graphicsObject.Shader;
+            //Debug.WriteLine(shader.name);
+            shader.Use();
+
             shader.SetMatrix4("model", Model);
             shader.SetMatrix4("view", View);
             shader.SetMatrix4("projection", Projection);
+
+            shader.SetUniformInt("tCnt", transforms.Transforms.Count / 3);
+            shader.SetMatrix4Array("Transforms", transforms.Transforms.ToArray());
 
             //shader.SetMatrix4("obj_translate", graphicsObject.matPos);
             //shader.SetMatrix4("obj_scale", graphicsObject.matScale);

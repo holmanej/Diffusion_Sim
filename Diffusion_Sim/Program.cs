@@ -50,6 +50,7 @@ namespace Diffusion_Sim
                 Shader shader = new Shader(files[i + 1], files[i]);
                 string label = files[i].Substring(files[i].LastIndexOf('\\') + 1).Split('.')[0];
                 Debug.WriteLine(label);
+                shader.name = label;
 
                 shaders.Add(label, shader);
             }

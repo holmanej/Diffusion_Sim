@@ -64,19 +64,19 @@ namespace Diffusion_Sim
             });
             Controls.Add(new RectObject() // X Axis
             {
-                Position = new Vector3(0f, 0f, 0f),
-                //Position = new Vector3(length / 2f + 1, 0f, 0f),
+                //Position = new Vector3(0f, 0f, 0f),
+                Position = new Vector3(length / 2f + 1, 0f, 0f),
                 Scale = new Vector3(length + 1, 1, 0)
             });
 
             for (int i = 1; i < length - 1; i++)
             {
                 float m = magnitudes[i] * ScalingFactor * length / 8;
-                //Controls.Add(new RectObject()
-                //{
-                //    Position = new Vector3(1 + i, 2 + m / 2f, 0f),
-                //    Scale = new Vector3(1, m, 0)
-                //});
+                Controls.Add(new RectObject()
+                {
+                    Position = new Vector3(1 + i, 2 + m / 2f, 0f),
+                    Scale = new Vector3(1, m, 0)
+                });
             }
 
             //Title.Position = new Vector3(length / 2f, length + 10, 0);

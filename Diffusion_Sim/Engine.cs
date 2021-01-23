@@ -52,7 +52,7 @@ namespace Diffusion_Sim
 
             MassGraph = new GraphingObject()
             {
-                Scale = new Vector3(0.004f, 0.01f, 1f),
+                Scale = new Vector3(0.01f, 0.01f, 1f),
                 Position = new Vector3(-0.9f, -0.9f, 0f)
             };
 
@@ -66,8 +66,8 @@ namespace Diffusion_Sim
 
             Controls = new List<GraphicsObject>
             {
-                Engine_Model
-                //MassGraph
+                Engine_Model,
+                MassGraph
                 //PrsrGraph
                 //text
             };

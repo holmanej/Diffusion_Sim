@@ -10,9 +10,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform mat4 obj_translate;
-uniform mat4 obj_scale;
-uniform mat4 obj_rotate;
+uniform mat4 Transforms[24];
+uniform int tCnt;
 
 out vec3 fragPos;
 out vec3 fragNormal;
@@ -23,8 +22,13 @@ out vec4 objColor;
 
 void main()
 {
-	vec4 obj = vec4(vPosition, 1f) * obj_scale * obj_translate;
-	gl_Position = obj * model;
+	vec4 vertexPos = vec4(vPosition, 1f);
+	for (int i = 0; i < tCnt; i++)
+	{
+		vertexPos *= Transforms[3 * i] * Transforms[3 * i + 1] * Transforms[3 * i + 2];
+	}
+	
+	gl_Position = vertexPos * model * view;// * projection;
 	
 	fragPos = vec3(vec4(vPosition, 1f) * model);
 	fragNormal = vNormal * mat3(transpose(inverse(model)));

@@ -12,6 +12,7 @@ namespace Diffusion_Sim
 {
     public class Shader
     {
+        public string name;
         private int Handle;
 
         public Shader(string vertexPath, string fragmentPath)
@@ -99,12 +100,21 @@ namespace Diffusion_Sim
             GC.SuppressFinalize(this);
         }
 
-        public void BindUniformBlock(string blockName)
+        public void SetUniformInt(string name, int data)
         {
             GL.UseProgram(Handle);
-            int loc = GL.GetUniformBlockIndex(Handle, blockName);
-            GL.UniformBlockBinding(Handle, loc, 0);
-            Debug.WriteLine("uniform block loc: " + loc);
+            GL.Uniform1(GL.GetUniformLocation(Handle, name), data);
+        }
+
+        public void SetMatrix4Array(string name, Matrix4[] matricies)
+        {
+            GL.UseProgram(Handle);
+            int loc = GL.GetUniformLocation(Handle, name);
+            for (int i = 0; i < matricies.Length; i++)
+            {
+                GL.UniformMatrix4(loc + i, true, ref matricies[i]);
+                //Debug.WriteLine(i + "  " + matricies[i]);
+            }
         }
 
         public void SetMatrix4(string name, Matrix4 data)

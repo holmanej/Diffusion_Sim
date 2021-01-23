@@ -21,7 +21,7 @@ namespace Diffusion_Sim
 
         public TransformObject()
         {
-            Transforms = new List<Matrix4> { matPos, matScale, matRot };
+            Transforms = new List<Matrix4> { matPos, matRot, matScale };
         }
 
         public TransformObject(TransformObject obj)
@@ -29,7 +29,7 @@ namespace Diffusion_Sim
             Position = obj.Position;
             Scale = obj.Scale;
             Rotation = obj.Rotation;
-            Transforms = new List<Matrix4> { matPos, matScale, matRot };
+            Transforms = new List<Matrix4>(obj.Transforms);
         }
 
         public void Translate(float x, float y, float z)
@@ -85,7 +85,7 @@ namespace Diffusion_Sim
                 {
                     _Scale = value;
                     matScale = Matrix4.CreateScale(_Scale);
-                    Transforms[1] = matScale;
+                    Transforms[2] = matScale;
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace Diffusion_Sim
                 {
                     _Rotation = value;
                     matRot = Matrix4.CreateRotationX(_Rotation.X * 3.14f / 180) * Matrix4.CreateRotationZ(_Rotation.Z * 3.14f / 180) * Matrix4.CreateRotationY(_Rotation.Y * 3.14f / 180);
-                    Transforms[2] = matRot;
+                    Transforms[1] = matRot;
                 }
             }
         }
