@@ -52,24 +52,21 @@ namespace Diffusion_Sim
 
             MassGraph = new GraphingObject()
             {
-                Scale = new Vector3(0.01f, 0.01f, 1f),
-                Position = new Vector3(-0.9f, -0.9f, 0f)
+                Scale = new Vector3(0.008f, 0.01f, 1f),
+                Position = new Vector3(-1.6f, -0.9f, 0f)
             };
 
             PrsrGraph = new GraphingObject()
             {
-                Scale = new Vector3(0.004f, 0.01f, 1f),
+                Scale = new Vector3(0.008f, 0.01f, 1f),
                 Position = new Vector3(-0.4f, -0.9f, 0f)
             };
-
-            var text = new TextObject("hewwo", Program.Fonts["times"]);
 
             Controls = new List<GraphicsObject>
             {
                 Engine_Model,
-                MassGraph
-                //PrsrGraph
-                //text
+                MassGraph,
+                PrsrGraph
             };
 
             Engine_Area = Pi * Engine_Diameter * Engine_Diameter;
@@ -104,7 +101,7 @@ namespace Diffusion_Sim
             //Debug.WriteLine("net flow: " + (Influx(Flow_in) - OutFlux(P_Values[P_Values.Count - 2])));
             //Debug.WriteLine("i: 101" + "  P: " + P_Values[101] + "  M: " + M_Values[101]);
 
-            //PrsrGraph.RefreshGraph(P_Values);
+            PrsrGraph.RefreshGraph(P_Values);
             MassGraph.RefreshGraph(M_Values);
         }
 

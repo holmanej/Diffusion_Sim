@@ -106,10 +106,11 @@ namespace Diffusion_Sim
         }
 
         public static Color White = new Color(1f, 1f, 1f, 1f);
-        public static Color Black = new Color(0f, 0f, 0f, 1f);
+        public static Color Black = new Color(0, 0, 0, 1f);
         public static Color Red = new Color(1f, 0.25f, 0.25f, 1f);
         public static Color DarkRed = new Color(1f, 0f, 0f, 1f);
         public static Color Blue = new Color(0f, 0f, 1f, 1f);
         public static Color LightBlue = new Color(0.25f, 0.25f, 0.75f, 1f);
+        public static Color Green = new Color(0f, 0.75f, 0f, 1f);
     }
 }
