@@ -67,13 +67,7 @@ namespace Diffusion_Sim
             {
                 Engine_Model,
                 MassGraph,
-                PrsrGraph,
-                new TextObject(Program.Fonts["times"])
-                {
-                    Content = "Hewwo uwu",
-                    Size = 0.1f,
-                    Position = new Vector3(0, 0, 0)
-                }
+                PrsrGraph
         };
 
             Engine_Area = Pi * Engine_Diameter * Engine_Diameter;

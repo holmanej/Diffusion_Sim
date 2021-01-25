@@ -18,7 +18,7 @@ namespace Diffusion_Sim
         private GlyphTypeface Font;
         private string _Content;
         private double _Size;
-        private double RenderSize = 64;
+        private double RenderSize = 256;
         private System.Windows.Media.Color _Color;
 
         public TextObject(GlyphTypeface font)
@@ -35,7 +35,7 @@ namespace Diffusion_Sim
 
             Font = font;
             _Size = 8;
-            _Color = System.Windows.Media.Color.FromRgb(255, 0, 0);
+            _Color = System.Windows.Media.Color.FromRgb(255, 255, 255);
         }
 
         private void CreateString()
@@ -64,7 +64,15 @@ namespace Diffusion_Sim
             BitmapEncoder encoder = new BmpBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bmp_render));
             encoder.Save(stream);
-            RenderSections[0].ImageData = stream.ToArray();
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(stream);
+            bmp.Save("text_test.bmp", ImageFormat.Bmp);
+
+            var dataLength = bmp.Width * bmp.Height * 4;
+            var headerLength = stream.Length - dataLength;
+            byte[] data = new byte[dataLength];
+            Array.Copy(stream.ToArray(), headerLength, data, 0, data.Length);
+
+            RenderSections[0].ImageData = data;
             RenderSections[0].ImageSize = new System.Drawing.Size((int)xAdvance, (int)yAdvance);
 
             float w = (float)(xAdvance / RenderSize * _Size);
@@ -78,8 +86,7 @@ namespace Diffusion_Sim
                     0, h, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                     w, h, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
                 };
-            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(stream);
-            bmp.Save("text_test.bmp", ImageFormat.Bmp);
+            
         }
 
         public string Content
