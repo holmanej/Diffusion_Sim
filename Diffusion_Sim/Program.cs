@@ -2,27 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace Diffusion_Sim
 {
     class Program
     {
-        static public Dictionary<string, Shader> Shaders;
-        static public Dictionary<string, FontFamily> Fonts;
+        static public Dictionary<string, Shader> Shaders = new Dictionary<string, Shader>();
+        static public Dictionary<string, GlyphTypeface> Fonts = new Dictionary<string, GlyphTypeface>();
         static public List<Engine> Engines = new List<Engine>();
 
         static void Main(string[] args)
         {
             using (RenderWindow SimWin = new RenderWindow(1600, 900, "Diffusion Simulator"))
             {
-                Shaders = LoadShaders();
-                Fonts = LoadFonts();
+                LoadShaders();
+                LoadFonts();
 
                 SetDir(@"/resources/models");
                 //SimWin.GraphicsObjects.Add(new GLTFObject(new GLTF_Converter("compressor cylinder.gltf"), Shaders["shader"]));
@@ -36,12 +34,11 @@ namespace Diffusion_Sim
             }
         }
 
-        static Dictionary<string, Shader> LoadShaders()
+        static void LoadShaders()
         {
             SetDir(@"/resources/shaders");
 
             Debug.WriteLine("Loading Shaders");
-            Dictionary<string, Shader> shaders = new Dictionary<string, Shader>();
             string[] files = Directory.GetFiles(Directory.GetCurrentDirectory());
 
             for (int i = 0; i < files.Length; i += 2)
@@ -52,30 +49,23 @@ namespace Diffusion_Sim
                 Debug.WriteLine(label);
                 shader.name = label;
 
-                shaders.Add(label, shader);
+                Shaders.Add(label, shader);
             }
-
-            return shaders;
         }
 
-        static Dictionary<string, FontFamily> LoadFonts()
+        static void LoadFonts()
         {
             SetDir(@"/resources/fonts");
             Debug.WriteLine("Loading Fonts");
 
-            Dictionary<string, FontFamily> fonts = new Dictionary<string, FontFamily>();
             string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.ttf");
             foreach (string f in files)
             {
-                PrivateFontCollection pfc = new PrivateFontCollection();
-                pfc.AddFontFile(f);
                 string label = f.Substring(f.LastIndexOf('\\') + 1).Split('.')[0];
                 Debug.WriteLine(label);
 
-                fonts.Add(label, pfc.Families[0]);
+                Fonts.Add(label, new GlyphTypeface(new Uri(f)));
             }
-
-            return fonts;
         }
 
         public static void SetDir(string name)

@@ -96,7 +96,7 @@ namespace Diffusion_Sim
             foreach (Engine engine in Program.Engines)
             {
                 engine.Timestep();
-                engine.Engine_Model.Position = new Vector3(0, 0, ZPosition);
+                engine.Engine_Model.Z = ZPosition;
                 engine.Engine_Model.Rotation = new Vector3(XRotation, YRotation, ZRotation);
             }
 
@@ -107,10 +107,12 @@ namespace Diffusion_Sim
         {
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Blend);
 
             Model = Matrix4.CreateScale(9 / 16f, 1f, 1f);
             View = Matrix4.CreateTranslation(0f, 0f, 0f);
             Projection = Matrix4.CreatePerspectiveFieldOfView(60f * 3.14f / 180f, 1f, 0.01f, 200f);
+            //Projection = Matrix4.CreateOrthographic(1600, 900, 0.01f, 200f);
 
             int stride = 12;
             GL.BindVertexArray(VertexArrayObject);
@@ -155,7 +157,7 @@ namespace Diffusion_Sim
             }
             GL.BindVertexArray(0);
 
-            Debug.WriteLine(RenderTime);
+            //Debug.WriteLine(RenderTime);
             Context.SwapBuffers();
             base.OnRenderFrame(e);
         }
@@ -175,6 +177,7 @@ namespace Diffusion_Sim
                     {
                         //Debug.WriteLine("leaf control: " + T.Transforms.Count);
                         T.Transforms.Reverse();
+                        //T.Transforms.ForEach(t => Debug.WriteLine(t));
                         RenderObject(control, T);
                     }
                     else

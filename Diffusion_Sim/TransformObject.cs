@@ -76,6 +76,20 @@ namespace Diffusion_Sim
             }
         }
 
+        public float Z
+        {
+            get { return _Position.Z; }
+            set
+            {
+                if (value != _Position.Z)
+                {
+                    _Position.Z = value;
+                    matPos = Matrix4.CreateTranslation(_Position);
+                    Transforms[0] = matPos;
+                }
+            }
+        }
+
         public Vector3 Scale
         {
             get { return _Scale; }

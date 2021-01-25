@@ -45,10 +45,11 @@ namespace Diffusion_Sim
 
         public Engine(string gltf_file, string spec_file)
         {
-            Engine_Model = new GLTFObject(new GLTF_Converter(gltf_file))
+            Engine_Model = new GraphicsObject(new GLTFObject(new GLTF_Converter(gltf_file)))
             {
-                Scale = new Vector3(Engine_Diameter, Engine_Diameter, Engine_Length)
+                Position = new Vector3(-0.5f, 0.3f, 0f)
             };
+            Engine_Model.Controls[0].Scale = new Vector3(Engine_Diameter, Engine_Diameter, Engine_Length);
 
             MassGraph = new GraphingObject()
             {
@@ -62,18 +63,24 @@ namespace Diffusion_Sim
                 Position = new Vector3(-0.4f, -0.9f, 0f)
             };
 
-            Controls = new List<GraphicsObject>
+            Controls = new List<TransformObject>
             {
                 Engine_Model,
                 MassGraph,
-                PrsrGraph
-            };
+                PrsrGraph,
+                new TextObject(Program.Fonts["times"])
+                {
+                    Content = "Hewwo uwu",
+                    Size = 0.1f,
+                    Position = new Vector3(0, 0, 0)
+                }
+        };
 
             Engine_Area = Pi * Engine_Diameter * Engine_Diameter;
             Engine_Volume = Engine_Area * Engine_Length / Resolution;
 
             float initial_mass = (Ambient_P * Atm_Coeff * Engine_Volume) / (B * Ambient_T);
-            for (int i = 0; i < 102; i++)
+            for (int i = 0; i < Resolution + 2; i++)
             {
                 M_Values.Add(initial_mass);
                 P_Values.Add(Ambient_P);

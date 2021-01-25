@@ -1,121 +1,101 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Diffusion_Sim
 {
     class TextObject : GraphicsObject
     {
-        private FontFamily FontFamily;
-        private List<Bitmap> Characters = new List<Bitmap>();
+        private GlyphTypeface Font;
+        private string _Content;
+        private double _Size;
+        private double RenderSize = 64;
+        private System.Windows.Media.Color _Color;
 
-        public string _Text;
-        public int _Size;
-        public System.Drawing.Color _Color;
-        public System.Drawing.Color _BGColor;
-
-        public TextObject(string text, FontFamily fontfamily)
+        public TextObject(GlyphTypeface font)
         {
             Shader = Program.Shaders["text"];
-            _Text = text;
-            _Size = 12;
-            _Color = System.Drawing.Color.Black;
-            _BGColor = System.Drawing.Color.White;
-            FontFamily = fontfamily;
-
-            CreateBitmaps();
-            RenderSections = new List<Section>();
-            WriteString();
-        }
-
-        private void CreateBitmaps()
-        {
-            Font font = new Font(FontFamily, _Size, GraphicsUnit.Pixel);
-            for (int i = 32; i < 127; i++)
+            RenderSections = new List<Section>()
             {
-                Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format32bppArgb);
-                Graphics g = Graphics.FromImage(bmp);
-                SizeF charSize = g.MeasureString(Convert.ToChar(i).ToString(), font);
-                Bitmap charBmp = new Bitmap((int)charSize.Width, font.Height, PixelFormat.Format32bppRgb);
-                g = Graphics.FromImage(charBmp);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                g.Clear(_BGColor);
-                g.DrawString(Convert.ToChar(i).ToString(), font, new SolidBrush(_Color), 0, 0, StringFormat.GenericTypographic);
-                Characters.Add(charBmp);
-            }
-        }
-
-        private void WriteString()
-        {
-            RenderSections.Clear();
-
-            List<Bitmap> stringBmps = new List<Bitmap>();
-            for (int i = 0; i < _Text.Length; i++)
-            {
-                stringBmps.Add(Characters[_Text[i] - ' ']);
-            }
-            int stringWidth = stringBmps.Sum(b => b.Width);
-            int stringHeight = stringBmps[0].Height;
-
-            Bitmap template = new Bitmap(stringWidth, stringHeight, PixelFormat.Format32bppArgb);
-            using (Graphics g = Graphics.FromImage(template))
-            {
-                int totalWidth = 0;
-                for (int i = 0; i < stringBmps.Count; i++)
+                new Section()
                 {
-                    g.DrawImage(stringBmps[i], totalWidth, 0);
-                    totalWidth += stringBmps[i].Width;
+                    metal = 1f,
+                    rough = 1f
                 }
-            }
-            BitmapData charData = template.LockBits(new Rectangle(0, 0, template.Width, template.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
-            byte[] imgData = new byte[template.Width * template.Height * 4];
-            Marshal.Copy(charData.Scan0, imgData, 0, imgData.Length);
-            template.UnlockBits(charData);
+            };
 
-            float w = stringWidth / 400f;
-            float h = stringHeight / 300f;
-            RenderSections.Add(new Section
-            {
-                VBOData = new List<float>()
-                {
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    w, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-                    0, h, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    w, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-                    0, h, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    w, h, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0
-                },
-
-                ImageData = imgData,
-                ImageSize = template.Size,
-
-                metal = 0.5f,
-                rough = 0.5f
-            });
+            Font = font;
+            _Size = 8;
+            _Color = System.Windows.Media.Color.FromRgb(255, 0, 0);
         }
 
-        public string Text
+        private void CreateString()
         {
-            get { return _Text; }
+            DrawingVisual visual = new DrawingVisual();
+            DrawingContext context = visual.RenderOpen();
+            Brush brush = new SolidColorBrush(_Color);
+
+            double xAdvance = 0;
+            double yAdvance = Font.AdvanceHeights[0] * RenderSize;
+
+            foreach (char c in _Content.ToArray())
+            {
+                ushort glyph = Font.CharacterToGlyphMap[c];
+                context.PushTransform(new TranslateTransform(xAdvance, yAdvance));
+                context.DrawGeometry(brush, null, Font.GetGlyphOutline(glyph, RenderSize, 1));
+                context.Pop();
+                xAdvance += Font.AdvanceWidths[glyph] * RenderSize;
+            }
+            context.Close();
+
+            RenderTargetBitmap bmp_render = new RenderTargetBitmap((int)xAdvance, (int)yAdvance, 72, 96, PixelFormats.Pbgra32);
+            bmp_render.Clear();
+            bmp_render.Render(visual);
+            MemoryStream stream = new MemoryStream();
+            BitmapEncoder encoder = new BmpBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bmp_render));
+            encoder.Save(stream);
+            RenderSections[0].ImageData = stream.ToArray();
+            RenderSections[0].ImageSize = new System.Drawing.Size((int)xAdvance, (int)yAdvance);
+
+            float w = (float)(xAdvance / RenderSize * _Size);
+            float h = (float)(yAdvance / RenderSize * _Size);
+            RenderSections[0].VBOData = new List<float>()
+                {
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    w, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, h, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                    w, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, h, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                    w, h, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+                };
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(stream);
+            bmp.Save("text_test.bmp", ImageFormat.Bmp);
+        }
+
+        public string Content
+        {
+            get { return _Content; }
             set
             {
-                if (value != _Text)
+                if (value != _Content)
                 {
-                    _Text = value;
-                    WriteString();
+                    _Content = value;
+                    CreateString();
                 }
             }
         }
 
-        public int Size
+        public double Size
         {
             get { return _Size; }
             set
@@ -123,36 +103,7 @@ namespace Diffusion_Sim
                 if (value != _Size)
                 {
                     _Size = value;
-                    CreateBitmaps();
-                    WriteString();
-                }
-            }
-        }
-
-        public System.Drawing.Color Color
-        {
-            get { return _Color; }
-            set
-            {
-                if (value != _Color)
-                {
-                    _Color = value;
-                    CreateBitmaps();
-                    WriteString();
-                }
-            }
-        }
-
-        public System.Drawing.Color BGColor
-        {
-            get { return _BGColor; }
-            set
-            {
-                if (value != _BGColor)
-                {
-                    _BGColor = value;
-                    CreateBitmaps();
-                    WriteString();
+                    CreateString();
                 }
             }
         }

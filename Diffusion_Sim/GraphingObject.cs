@@ -10,33 +10,13 @@ namespace Diffusion_Sim
 {
     class GraphingObject : GraphicsObject
     {
-        private TextObject Title;
-        private TextObject XLabel;
-        private TextObject YLabel;
         private float ScalingFactor = 1;
+        private float ScalingDelta = 0.5f;
+        private int ScaleCnt = 100;
 
         public GraphingObject()
         {
-            Controls = new List<GraphicsObject>();
-
-            Title = new TextObject("Title", Program.Fonts["times"])
-            {
-                Size = 20,
-                Color = System.Drawing.Color.Black,
-                BGColor = System.Drawing.Color.White
-            };
-            XLabel = new TextObject("X", Program.Fonts["times"])
-            {
-                Size = 12,
-                Color = System.Drawing.Color.Black,
-                BGColor = System.Drawing.Color.White
-            };
-            YLabel = new TextObject("Y", Program.Fonts["times"])
-            {
-                Size = 12,
-                Color = System.Drawing.Color.Black,
-                BGColor = System.Drawing.Color.White
-            };
+            Controls = new List<TransformObject>();
         }
 
         public void RefreshGraph(List<float> magnitudes)
@@ -45,16 +25,23 @@ namespace Diffusion_Sim
 
             int length = magnitudes.Count;
             float max = magnitudes.Max();
-            float scaled = max * ScalingFactor * length / 8;
 
-            if (scaled < length / 5f)
+            for (int i = 0; i < ScaleCnt; i++)
             {
-                ScalingFactor += 0.01f;
+                float scaled = max * ScalingFactor * length / 8;
+
+                if (scaled < length / 5f)
+                {
+                    ScalingFactor += ScalingDelta;
+                }
+                else if (scaled >= length / 2f)
+                {
+                    ScalingFactor -= ScalingDelta;
+                }
             }
-            else if (scaled >= length / 2f)
-            {
-                ScalingFactor -= 0.01f;
-            }
+
+            ScaleCnt = 1;
+            ScalingDelta = 0.01f;
 
             Controls.Add(new RectObject() // Y Axis
             {
@@ -82,14 +69,6 @@ namespace Diffusion_Sim
                     BRColor = Color.LightBlue
                 });
             }
-
-            //Title.Position = new Vector3(0, 0, 0);
-            //Title.Position = new Vector3(length / 2f, length + 10, 0);
-            Controls.Add(Title);
-            //XLabel.Position = new Vector3(length / 2f, -10, 0);
-            //Controls.Add(XLabel);
-            //YLabel.Position = new Vector3(-10, length / 2f, 0);
-            //Controls.Add(YLabel);
         }
     }
 }

@@ -73,7 +73,7 @@ namespace Diffusion_Sim
             for (var i = 0; i < numberOfUniforms; i++)
             {
                 // get the name of this uniform,
-                Debug.WriteLine(GL.GetActiveUniform(Handle, i, out _, out _) + GL.GetUniformLocation(Handle, GL.GetActiveUniform(Handle, i, out _, out _)));
+                //Debug.WriteLine(GL.GetActiveUniform(Handle, i, out _, out _) + GL.GetUniformLocation(Handle, GL.GetActiveUniform(Handle, i, out _, out _)));
             }
         }
 
